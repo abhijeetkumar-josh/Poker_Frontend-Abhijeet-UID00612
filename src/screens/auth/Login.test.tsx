@@ -1,30 +1,41 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { MemoryRouter ,Routes,Route} from 'react-router-dom';
 import Login from './Login.tsx';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { vi } from 'vitest';
+import { useNavigate } from 'react-router-dom';
 
-const renderWithStore = (store) => {
-  return render(
-    <Provider store={store}>
-      <MemoryRouter initialEntries={['/login']}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/newgame" element={<div>New Game Page</div>} />
-        </Routes>
-      </MemoryRouter>
-    </Provider>
-  );
-};
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: vi.fn(),
+  };
+});
 
-describe('Login Component', () => {
+const mockNavigate = vi.fn();
+
+beforeEach(() => {
+  (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+});
+
+vi.mock("../../Services/Services", () => ({
+  loadPublicKey: vi.fn(),
+}));
+
+
+const mockStore = configureStore({
+  reducer: { auth: () => ({ isAuthenticated: false, loading: false, error:'Email is not valid'}) },
+});
+
+describe("Login Component", () => {
   test('shows email is not valid when user enters wrong email format', async () => {
-    const mockStore = configureStore({
-      reducer: { auth: () => ({ isAuthenticated: false, loading: false, error: 'Invalid credentials' }) },
-    });
-
-    renderWithStore(mockStore);
-
+    render(
+      <Provider store={mockStore}>
+        <Login />
+      </Provider>
+    ); 
+    
     fireEvent.change(screen.getByPlaceholderText(/Email/i), {
       target: { value: 'wrongformat' },
     });
@@ -33,22 +44,26 @@ describe('Login Component', () => {
     });
     fireEvent.click(screen.getByTestId('login-Button'));
 
-    expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
+    expect(await screen.findByText('Email is not valid')).toBeInTheDocument();
   });
 
   test('shows error when password is empty', async () => {
     const mockStore = configureStore({
-      reducer: { auth: () => ({ isAuthenticated: false, loading: false, error: 'Password required' }) },
+       reducer: { auth: () => ({ isAuthenticated: false, loading: false, error:'passwords must be 8 character long'}) },
     });
-
-    renderWithStore(mockStore);
-
+    render(
+      <Provider store={mockStore}>
+        <Login />
+      </Provider>
+    );
+    
     fireEvent.change(screen.getByPlaceholderText(/Email/i), {
       target: { value: 'some@gmail.com' },
     });
     fireEvent.click(screen.getByTestId('login-Button'));
 
-    expect(await screen.findByText('Password required')).toBeInTheDocument();
+    expect(await screen.findByText('passwords must be 8 character long')).toBeInTheDocument();
   });
+
 });
 

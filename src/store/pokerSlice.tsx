@@ -12,6 +12,8 @@ export interface pokerInfo {
   pokerid: number;
   game_name: string;
   game_description: string;
+  accept:boolean;
+  member_count:number;
 }
 
 export interface ticket {
@@ -20,9 +22,15 @@ export interface ticket {
 }
 
 export interface Estimate {
+  key:string;
+  priority:string;
   estimate: number;
   summary: string;
   description: string;
+  type:number;
+  pokerid:number;
+  ticketid:number;
+  estimateid:number;
 }
 
 export interface pokerState {
@@ -30,6 +38,7 @@ export interface pokerState {
   groups: GroupInfo[];
   estimates: Estimate[];
   tickets: ticket[];
+  token:string;
 }
 
 const initialState: pokerState = {
@@ -37,6 +46,7 @@ const initialState: pokerState = {
   groups: [],
   estimates: [],
   tickets: [],
+  token:""
 };
 
 // Shape of the API payload for `update`
@@ -50,48 +60,35 @@ const pokerSlice = createSlice({
   name: 'poker',
   initialState,
   reducers: {
-    updatePoker(state, action: PayloadAction<pokerInfo>) {
-      state.pokers.push(action.payload);
+    updatePoker(state, action) {
+      state.pokers[action.payload].accept=true;
     },
     updateGroup(state, action: PayloadAction<GroupInfo>) {
       state.groups.push(action.payload);
     },
-    updateEstimate(state, action: PayloadAction<Estimate>) {
-      state.estimates.push(action.payload);
+    updateEstimate(state, action) {
+      const {ticketid,estimate}=action.payload;
+      console.log(state.estimates.filter(poker => poker.estimateid === ticketid)[0])
+      state.estimates.filter(poker => poker.estimateid === ticketid)[0].estimate=estimate;
     },
     update(state, action: PayloadAction<UpdatePayload>) {
-        console.log(action.payload)
-      const { PokerInfo = [], GroupInfo = [], TicketInfo = [] } = action.payload;
-
-      // Update PokerInfo
-      PokerInfo.forEach((key: any) => {
-        const obj={
-          id: key.id,
-          role: key.role,
-          pokerid: key.poker?.pokerid || 0,
-          game_name: key.poker?.game_name || '',
-          game_description: key.poker?.game_description || '',
-        }
-        console.log('hello')
-        console.log(obj)
+      console.log(action.payload)
+      const { PokerInfo = [], GroupInfo = [], TicketInfo = []} = action.payload;
+      state.pokers=[]
+      state.estimates=[]
+      state.groups=[]
+      PokerInfo.forEach((key:any) => {
         state.pokers.push({
           id: key.id,
           role: key.role,
-          pokerid: key.poker?.pokerid || 0,
-          game_name: key.poker?.game_name || '',
-          game_description: key.poker?.game_description || '',
+          pokerid: key.poker?.pokerid,
+          game_name: key.poker?.game_name,
+          game_description: key.poker?.game_description ,
+          accept: key.accept,
+          member_count:key.poker.member.length
         });
       });
-
-      // Update GroupInfo
       GroupInfo.forEach((group: any) => {
-        const obj={
-          id: group.id,
-          name: group.name,
-          users: group.users || [],
-        }
-        console.log('what')
-        console.log(obj)
         state.groups.push({
           id: group.id,
           name: group.name,
@@ -99,19 +96,17 @@ const pokerSlice = createSlice({
         });
       });
 
-      // Update TicketInfo
       TicketInfo.forEach((Ticket: any) => {
-        const obj={
-          estimate:Ticket.estimate,
-          summary: Ticket.ticket.summary || '',
-          description: Ticket.ticket.description || '',
-        }
-        console.log('what')
-        console.log(obj)
         state.estimates.push({
           estimate:Ticket.estimate,
-          summary: Ticket.ticket.summary || '',
-          description: Ticket.ticket.description || '',
+          summary: Ticket.ticket.summary,
+          description: Ticket.ticket.description,
+          type : Ticket.ticket.type,
+          pokerid:Ticket.ticket.pokerid,
+          key:Ticket.ticket.key,
+          priority:Ticket.ticket.priority,
+          ticketid:Ticket.ticket.id,
+          estimateid:Ticket.id,
         });
       });
     },
@@ -120,3 +115,4 @@ const pokerSlice = createSlice({
 
 export const { updatePoker, updateGroup, updateEstimate, update } = pokerSlice.actions;
 export default pokerSlice.reducer;
+

@@ -46,8 +46,8 @@ describe("Pokerlist Component", () => {
       </Provider>
     );
 
-    const nextButton = screen.getByText(/next/i);
-    const prevButton = screen.getByText(/prev/i);
+    const nextButton = screen.getByText(/>/i);
+    const prevButton = screen.getByText(/</i);
 
     expect(prevButton).toHaveClass("disable");
 
@@ -78,3 +78,5 @@ describe("Pokerlist Component", () => {
     expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
   });
 });
+
+

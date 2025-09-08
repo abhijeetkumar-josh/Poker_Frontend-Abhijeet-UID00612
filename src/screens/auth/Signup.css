@@ -2,3 +2,9 @@
   background-color:rgb(243, 80, 21);
   color:white;
 }
+
+.nav-logo {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+}

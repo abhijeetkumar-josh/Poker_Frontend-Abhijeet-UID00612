@@ -4,33 +4,33 @@ import { VerifyEmail } from "../../Services/Services";
 import {useDispatch} from 'react-redux';
 import { AppDispatch } from '../../store/store'
 import {log} from "../../store/authSlice"
+// import { update } from "../../store/pokerSlice";
 
 export default function EmailCheck() {
   const navigate = useNavigate();
-  const {uid,token}=useParams();
+  const {token}=useParams();
   const dispatch = useDispatch<AppDispatch>();
-  dispatch(log())
     useEffect(() => {
         const checkemail = async () => {
         //   setLoading(true);
           try {
-            console.log(uid)
-            console.log(token)
-            if (!uid || !token) return navigate("/failed", { replace:true } );
-            const result = await VerifyEmail(uid,token)
+            if (!token) return navigate("/failed", { replace:true } );
+            const result = await VerifyEmail(token)
             if(result.status===200){
-              dispatch(log())
+              // dispatch(log())
               return navigate("/profile", { replace:true })
             }
-          } catch(err) {
-            console.log(err)
+            else {
+              return navigate("/failed", { replace: true })
+            }
+          } catch {
             return navigate("/failed", { replace: true });
           } finally {
             // setLoading(false);
           }
         };
         checkemail();
-      },[dispatch,navigate,token,uid]);
+      },[dispatch,navigate,token]);
 
   return(
       <>

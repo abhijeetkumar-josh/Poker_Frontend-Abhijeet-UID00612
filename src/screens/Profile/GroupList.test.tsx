@@ -41,17 +41,25 @@ describe('Grouplist Component', () => {
       </Provider>
     );
 
-    const nextBtn = screen.getByText(/next/i) as HTMLButtonElement;
-    const prevBtn = screen.getByText(/prev/i) as HTMLButtonElement;
+    const nextButton = screen.getByText(/>/i);
+    const prevButton = screen.getByText(/</i);
 
-    expect(prevBtn).toHaveClass('disable');
-    expect(nextBtn).not.toHaveClass('disable');
+    expect(prevButton).toHaveClass("disable");
 
-    fireEvent.click(nextBtn);
+    fireEvent.click(nextButton);
 
-    expect(prevBtn).not.toHaveClass('disable');
+    expect(prevButton).not.toHaveClass("disable");
 
-    fireEvent.click(nextBtn);
-    expect(nextBtn).toHaveClass('disable');
+    const items = screen.getAllByRole("listitem");
+    expect(items).toHaveLength(6);
+    expect(screen.getByText("Group 10")).toBeInTheDocument();
+
+    expect(nextButton).toHaveClass("disable");
+
+    fireEvent.click(prevButton);
+
+    const itemsBack = screen.getAllByRole("listitem");
+    expect(itemsBack).toHaveLength(9);
+    expect(screen.getByText("Group 1")).toBeInTheDocument();
   });
 });

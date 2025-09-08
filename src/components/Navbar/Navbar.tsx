@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { RootState } from "../../store/store";
 import { logout } from "../../store/authSlice";
 import "./Navbar.css";
+import { HandleLogout } from "../../Services/Services";
 
 const Navbar = () => {
   const isAuthenticated = useSelector(
@@ -10,9 +11,10 @@ const Navbar = () => {
   );
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleLogout = () => {
+  const handleLogout = async() => {
+    await HandleLogout();
     dispatch(logout());
-    navigate("/login");
+    navigate("/login",{replace:true});
   };
 
   if (!isAuthenticated) return null;
@@ -31,6 +33,9 @@ const Navbar = () => {
       <ul className="nav-links">
         <li>
           <Link to="/dashboard">Dashboard</Link>
+        </li>
+        <li>
+          <Link to="/gamecreation">Create Game</Link>
         </li>
         <li>
           <Link to="/profile">Profile</Link>

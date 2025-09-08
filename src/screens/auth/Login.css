@@ -40,3 +40,9 @@
   color: rgb(69, 69, 252);
   cursor: pointer;
 }
+
+.nav-logo {
+  height: 40px;
+  width: 40px;
+  object-fit: contain;
+}
