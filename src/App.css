@@ -25,6 +25,11 @@
   justify-content: center;
 }
 
+.flex--between {
+  display: flex;
+  justify-content: space-between;
+}
+
 .active {
   background-color: blue;
   color: white;
@@ -49,5 +54,94 @@
   color:black;
   pointer-events: none;
   border-radius: 4px;
-  padding :10px 15px ;
+}
+
+.disable--blue {
+  background-color: #007bff;
+  color:white;
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+.login-error {
+  color: red;
+  margin-top: 0.625rem;
+  font-size: 0.875rem;
+  margin: 0px auto;
+}
+
+.border-boxing {
+  margin:1rem 0rem;
+  padding:0.625rem;
+  background-color: white;
+  border:1px solid black;
+  border-radius: 10px;
+  min-width: 8rem;
+  /* box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); */
+}
+
+.margin-10{
+  margin:10px 0px;
+}
+
+.margin-lr10 {
+  margin:0px 10px;
+}
+
+.shadow {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.game-users-container {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.game-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.game-users-table th,
+.game-users-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.game-users-table thead {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.game-users-table tr:hover {
+  background-color: #fafafa;
+}
+
+.action-col {
+  text-align: center;
+  width: 80px;
+}
+
+.delete-cell {
+  text-align: center;
+}
+
+.primary--button--modifier {
+  color:white;
+  background-color: #ee3131;
+  padding:6px 20px;
+}
+
+.primary--button--modifier:hover {
+  color:white;
+  background-color: #ee3131;
+}
+
+.flex--middle {
+  display:flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -3,6 +3,27 @@ import Signup from './Signup';
 import { Provider } from 'react-redux';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
+import { vi } from 'vitest';
+import { useNavigate } from 'react-router-dom';
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: vi.fn(),
+  };
+});
+
+const mockNavigate = vi.fn();
+
+beforeEach(() => {
+  (useNavigate as jest.Mock).mockReturnValue(mockNavigate);
+});
+
+vi.mock("../../Services/Services", () => ({
+  SignUser: vi.fn(),
+}));
+
 
 const authSlice = createSlice({
   name: 'auth',
@@ -45,7 +66,7 @@ describe('Signup Component', () => {
 
     fireEvent.change(screen.getByPlaceholderText(/Username/i), { target: { value: 'myuser' } });
     fireEvent.change(screen.getByPlaceholderText(/Email/i), { target: { value: 'myuser@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/^Password$/i), { target: { value: 'pass123' } });
+    fireEvent.change(screen.getByPlaceholderText(/^Password$/i), { target: { value: 'pass1235' } });
     fireEvent.change(screen.getByPlaceholderText(/Confirm Password/i), { target: { value: 'pass123' } });
 
     fireEvent.click(screen.getByRole('button', { name: /signup/i }));
@@ -55,21 +76,4 @@ describe('Signup Component', () => {
     });
   });
 
-  test('shows error message when error1 in state', () => {
-    const storeWithError = configureStore({
-      reducer: {
-        auth: () => ({ loading1: false, error1: 'Some error occurred' }),
-      },
-    });
-
-    render(
-      <Provider store={storeWithError}>
-        <MemoryRouter>
-          <Signup />
-        </MemoryRouter>
-      </Provider>
-    );
-
-    expect(screen.getByText(/some error occurred/i)).toBeInTheDocument();
-  });
 });

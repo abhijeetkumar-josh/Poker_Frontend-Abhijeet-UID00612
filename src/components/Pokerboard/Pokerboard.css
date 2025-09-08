@@ -1,0 +1,28 @@
+.green-bullets li::marker {
+  color: green;
+}
+
+.fibonacci {
+  min-width:5rem;
+  min-height: 5rem;
+}
+
+.fibonacci:hover {
+    background-color:rgb(176, 200, 221);
+    cursor:pointer;
+}
+
+.flex{
+  display: flex;
+}
+
+.flex--wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+
+.margin-10{
+  margin:10px 10px;
+}
+

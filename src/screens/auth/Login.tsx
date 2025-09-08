@@ -1,19 +1,21 @@
-import React, { useRef,useState } from 'react';
+import React, { useRef,useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../../store/authSlice';
 import { AppDispatch, RootState } from '../../store/store';
 import { useNavigate } from 'react-router-dom';
-import { update } from '../../store/pokerSlice'
+import { updateError } from '../../store/authSlice';
 import './Login.css';
 
 const Login: React.FC = () => {
+  
   const dispatch = useDispatch<AppDispatch>();
   const navigate=useNavigate();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
+  const { loading, error} = useSelector((state: RootState) => state.auth);
   const email = useRef<HTMLInputElement>(null);
   const password = useRef<HTMLInputElement>(null);
   const errorEmail = useRef<HTMLInputElement>(null);
   const errorPassword = useRef<HTMLInputElement>(null);
+  const [first,setFirst] = useState(false);
   const [fieldset, setFieldset] = useState<[number, number]>([0, 0]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,9 +23,9 @@ const Login: React.FC = () => {
     const Email = email.current?.value ?? "";
     const pass = password.current?.value ?? "";
     const result = await dispatch(loginUser({ email: Email, password: pass }));
+    setFirst(true)
     if (loginUser.fulfilled.match(result)) {
-      dispatch(update(result.payload.user.data))
-      navigate('/profile');
+      navigate('/profile',{replace:true});
       if (email.current) email.current.value = '';
       if (password.current) password.current.value = '';
       setFieldset([0,0])
@@ -36,6 +38,7 @@ const Login: React.FC = () => {
   
   const handleEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(error) dispatch(updateError())
     const Email:string=email.current?.value || "";
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const emailcheck:boolean=emailRegex.test(Email || "");
@@ -50,6 +53,7 @@ const Login: React.FC = () => {
   };
   const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if(error) dispatch(updateError())
     const pass:string=password.current?.value || "";
     if(pass.length<8){
       if(errorPassword.current) errorPassword.current.textContent = 'Password must be aleast 8 characters long'
@@ -66,6 +70,11 @@ const Login: React.FC = () => {
   return (
 
     <form onSubmit={handleSubmit} className="login-form">
+      <img
+        src="src/assets/jtg_logo.png" 
+        alt="Company Logo"
+        className="nav-logo"
+      />
       <h2 className="login-title">Login</h2>
       <input onInput ={handleEmail} type="text" placeholder="Email" ref={email} className="login-input" />
       <p className="login-error" ref={errorEmail}>{errorEmail.current?.value}</p>
@@ -74,15 +83,14 @@ const Login: React.FC = () => {
       <button
         data-testid="login-Button"
         type="submit"
-        className="primary--button"
-        disabled={loading || sum!==2}
+        className={(loading || sum!==2)?"primary--button primary--button--modifier disable":"primary--button primary--button--modifier"}
       >
         {loading ? 'Logging in...' : 'Login'}
       </button>
       <div >
         don't have an account? <p className="signup" onClick= {handleSignup}>Sign-up</p>
       </div>
-      {error && <p className="login-error">{error}</p>}
+      {first && error && <p className="login-error">{error}</p>}
     </form>
   );
 }

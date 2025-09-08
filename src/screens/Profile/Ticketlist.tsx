@@ -1,85 +1,56 @@
-import { useEffect } from "react";
 import './Profile.css'
-import { useRef ,useState} from "react";
+import { useEffect } from 'react';
 import { RootState } from '../../store/store';
 import { useSelector } from 'react-redux';
-import { Estimate } from "../../store/pokerSlice";
 import { Filter } from "../../Services/Services";
-
+import { useState } from 'react';
+import { Estimate } from '../../store/pokerSlice';
 
 const Ticketlist: React.FC = () => {
     const {estimates} = useSelector((state:RootState)=> state.poker)
-    const [Estimates, setEstimates] = useState<Estimate[]>(estimates);
+    const [Estimates,setEstimates] = useState(estimates)
     const perPage:number=6;
-    const totalPage:number=Math.ceil(Estimates.length/perPage) || 1;
-    const prevRefPoker= useRef<HTMLButtonElement>(null);
-    const nextRefPoker= useRef<HTMLButtonElement>(null);
-    const [page, setPage] = useState<number>(1);
-    // const [filterType,setFilterType]=useState('Estimated Date');
-    const [loading, setLoading] = useState(false);
-    const [Tickets,setTickets]=useState<Estimate[]>([]);
+    const totalPage:number=Math.ceil(Estimates.length/perPage);
+    const [page, setPage] = useState<number>(0);
     const [filterType, setFilterType] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
-
-
-  const handleSubmit =async (e: React.FormEvent) => {
-      e.preventDefault();
-      setLoading(true);
-      try {
-        const data = await Filter(filterType,selectedDate);
-        console.log(data)
-        setEstimates(data)  
-        setPage(1);
-      } catch (err) {
-        console.error('Error Filtering tcikets:', err);
-      } finally {
-        setLoading(false);
-      }
-  };
-
+    const [loading,setLoading]= useState(false)
 
     useEffect(() => {
-      const fetchBoards = async () => {
-        setLoading(true);
-        try {
-          const data:Estimate[] =[]
-          for(let i=(page-1)*perPage+(page!==totalPage?perPage:Estimates.length%perPage);i>(page-1)*perPage;--i){
-            data.push(Estimates[i-1])
-          }
-          // const itemsOnPage = (page !== totalPage ? perPage : (Estimates.length % perPage || perPage));
-          // for (let i = (page - 1) * perPage + itemsOnPage; i > (page - 1) * perPage; --i) {
-          //     data.push(Estimates[i - 1]);
-          // }
-          setTickets(data);
-        } catch (err) {
-          console.error('Error fetching Boards:', err);
-        } finally {
-          setLoading(false);
-        }
+      const Initial=()=>{
+         setEstimates((prev) => prev.filter((u) => u.estimate));
       };
-      fetchBoards();
-    },[page,Estimates,totalPage]);
-  
-    const handlePrevPoker = () => {
-      if (page >1){
-        setPage(page - 1);
-        nextRefPoker!.current!.classList.remove('disable');
-      }
-      else{
-        prevRefPoker!.current!.classList.add('disable');
+      Initial()
+    }, [estimates]);
+
+    const handleSubmit =async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        setLoading(true)
+        const data = await Filter(filterType,selectedDate);
+        const lst:Partial<Estimate>[]=[]
+        data.forEach((Ticket: any) => {
+        if(Ticket.estimate){
+            lst.push({
+              estimate:Ticket.estimate,
+              summary: Ticket.ticket.summary,
+              description: Ticket.ticket.description,
+              type : Ticket.ticket.type,
+              pokerid:Ticket.ticket.pokerid,
+              key:Ticket.ticket.key,
+              priority:Ticket.ticket.priority,
+            });
+        }
+        });
+        setEstimates(lst)  
+        setPage(0);
+      } catch (err) {
+        console.error('Error Filtering tickets:', err);
+      } finally{
+        setLoading(false)
       }
     };
-  
-    const handleNextPoker = () => {
-      if (page < (totalPage)){
-        setPage(page + 1);
-        prevRefPoker!.current!.classList.remove('disable');
-      }
-      else{
-        nextRefPoker!.current!.classList.add('disable');
-      }
-    };
-    
+
     return (
         <section className="section">
            <div className='flex--spaced form-group'>
@@ -92,6 +63,7 @@ const Ticketlist: React.FC = () => {
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
                 >
+                  <option value="">Select Type</option>
                     <option value="0">Task</option>
                     <option value="1">Bug</option>
                     <option value="2">Epic</option>
@@ -113,25 +85,71 @@ const Ticketlist: React.FC = () => {
              </form>
             </div>
           </div>
-          <ul className="ticket-list">
-            {loading? "loading...":
-          Tickets.map((ticket, index) => (
+          {/* <ul className="ticket-list">
+            {loading?'loading...':
+              Estimates.slice(
+              perPage*page,
+              page*perPage+((page!==totalPage)?perPage:estimates.length%perPage)
+            )
+            .map((ticket, index) => (
             <li key={index} className="ticket">
-              {/* <span className="ticket-id">{ticket.id}</span> */}
               <span className="ticket-title">{ticket.summary}</span>
               <span className="ticket-title">{ticket.estimate}</span>
               <span className="ticket-desc">{ticket.description}</span>
+              <span className="ticket-desc">{ticket.key}</span>
             </li>
           ))}
         </ul>
-          <div className="button--container flex--center">
-            <button  className={page === 1 ? "primary--button disable" : "primary--button"}  ref={prevRefPoker} onClick={handlePrevPoker} >
-              prev
+        {Estimates.length==0?(<p className='flex--center'>'No tickets to show'</p>):null}
+         {(totalPage!==1 && Estimates.length!==0)? <div className="button--container flex--center">
+            <button  className={page === 0 ? "primary--button disable" : "primary--button"}   onClick={()=>setPage(page-1)} >
+              {'<'}
             </button>
-            <button  className={page === totalPage ? "primary--button disable" : "primary--button"}  ref={nextRefPoker} onClick={handleNextPoker}>
-              next
+            <button  className={page === totalPage-1 ? "primary--button disable" : "primary--button"}  onClick={()=>setPage(page+1)}>
+              {'>'}
             </button>
-          </div>
+          </div>:null} */}
+          <div className="game-users-container">
+              <table className="game-users-table">
+                <thead>
+                  <tr>
+                    <th>Key</th>
+                    <th>Summary</th>
+                    <th>Description</th>
+                    <th>Estimate</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {
+                    loading?
+                      <tr>
+                        <td colSpan={4}>Loading...</td>
+                      </tr>:
+                      Estimates.slice(
+                      perPage*page,
+                      page*perPage+((page!==totalPage)?perPage:estimates.length%perPage)
+                    )
+                    .map((ticket,index)=>(
+                      <tr key={index}>
+                      <td>{ticket.key}</td>
+                      <td>{ticket.summary}</td>
+                      <td>{ticket.description}</td>
+                      <td>{ticket.estimate}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              {Estimates.length==0?(<p className='flex--center'>'You do not have any Estimates'</p>):null}
+              {(totalPage!==1 && Estimates.length!==0)?<div className="button--container flex--center">
+                <button  className={ page=== 0 ? "primary--button disable" : "primary--button"}  onClick={()=>setPage(page-1)} >
+                  {'<'}
+                </button>
+                <button  className={page === totalPage-1 ? "primary--button disable" : "primary--button"}  onClick={()=>setPage(page+1)}>
+                  {'>'}
+                </button>
+               </div>:null
+            } 
+            </div>
         </section>
     );
 };

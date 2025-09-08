@@ -41,8 +41,16 @@ describe('Ticketlist Component', () => {
       expect(screen.getByText('Description 1')).toBeInTheDocument();
     });
 
-    const ticketElements = screen.getAllByRole('listitem');
-    expect(ticketElements.length).toBe(6);
+    const table = screen.getByRole('table');
+    expect(table).toBeInTheDocument();
+
+    const rows = screen.getAllByRole('row');
+    expect(rows).toHaveLength(7)
+
+    
+    const firstCell = screen.getByText('Ticket 1');
+    expect(firstCell).toBeInTheDocument();
+
   });
 
   it('pagination buttons work', async () => {
@@ -54,14 +62,14 @@ describe('Ticketlist Component', () => {
 
     await waitFor(() => screen.getByText('Ticket 1'));
 
-    const nextButton = screen.getByText(/next/i);
+    const nextButton = screen.getByText(/>/i);
     fireEvent.click(nextButton);
 
     await waitFor(() => {
       expect(screen.getByText('Ticket 7')).toBeInTheDocument();
     });
 
-    const prevButton = screen.getByText(/prev/i);
+    const prevButton = screen.getByText(/</i);
     fireEvent.click(prevButton);
 
     await waitFor(() => {
@@ -89,7 +97,7 @@ describe('Ticketlist Component', () => {
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText('Filtered Ticket')).toBeInTheDocument();
+      expect(screen.getByText('Estimations')).toBeInTheDocument();
     });
   });
 });

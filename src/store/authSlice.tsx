@@ -1,11 +1,11 @@
 import { createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import { SignUser } from '../Services/Services';
 import { LoginUser,UpdateUser} from '../Services/Services';
-import { EditProfile } from '../screens/Profile/ProfileEdit';
 
 
 
 interface AuthState {
+  username:string,
   email:string;
   isAuthenticated: boolean;
   loading: boolean;
@@ -13,9 +13,11 @@ interface AuthState {
   error: string | null;
   error1:string | null;
   token: string | null;
+  isAuthChecked: boolean;
 }
 
 const initialState: AuthState = {
+  username:'',
   email:'',
   isAuthenticated: false,
   loading: false,
@@ -23,11 +25,12 @@ const initialState: AuthState = {
   error: null,
   error1:null,
   token: null,
+  isAuthChecked: false,
 };
 
 export const loginUser = createAsyncThunk(
   'auth/loginUser',
-  async (credentials: { email: string | undefined; password: string | undefined }, thunkAPI) => {
+  async (credentials: { email: string ; password: string}, thunkAPI) => {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const emailcheck:boolean=emailRegex.test(credentials.email|| "");
     const passwordcheck:boolean=!credentials.password || credentials.password.length < 8;
@@ -44,7 +47,8 @@ export const loginUser = createAsyncThunk(
 
     try {
       const res =await  LoginUser(credentials.email,credentials.password);
-      return { user: res ,email:credentials.email};
+      console.log(res)
+      return { user: res.data};
     } catch (err: any) {
       let val:string = "";
       if(typeof err.response.data==='object'){
@@ -58,67 +62,67 @@ export const loginUser = createAsyncThunk(
   }
 );
 
-export const updateUser = createAsyncThunk(
-  'auth/updateUser',
-  async (data:EditProfile, thunkAPI) => {
-    // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    // const emailcheck:boolean=emailRegex.test(credentials.email|| "");
-    // const passwordcheck:boolean=!credentials.password || credentials.password.length < 8;
-    // if(!credentials.username){ 
-    //   return thunkAPI.rejectWithValue('username cannot be null');
-    // }
-    if (!emailRegex.test(credentials.email|| "")) {
-      return thunkAPI.rejectWithValue('Email is not valid');
-    }
+// export const updateUser = createAsyncThunk(
+//   'auth/updateUser',
+//   async (data:EditProfile, thunkAPI) => {
+//     // const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+//     // const emailcheck:boolean=emailRegex.test(credentials.email|| "");
+//     // const passwordcheck:boolean=!credentials.password || credentials.password.length < 8;
+//     // if(!credentials.username){ 
+//     //   return thunkAPI.rejectWithValue('username cannot be null');
+//     // }
+//     if (!emailRegex.test(credentials.email|| "")) {
+//       return thunkAPI.rejectWithValue('Email is not valid');
+//     }
 
-    if (!credentials.password || credentials.password.length < 8) {
-      return thunkAPI.rejectWithValue('Password must be at least 8 characters long');
-    }
+//     if (!credentials.password || credentials.password.length < 8) {
+//       return thunkAPI.rejectWithValue('Password must be at least 8 characters long');
+//     }
 
-    // if(!emailcheck && passwordcheck){
-    //   return thunkAPI.rejectWithValue('Email is not valid and password must be 8 characters long');
-    // }
+//     // if(!emailcheck && passwordcheck){
+//     //   return thunkAPI.rejectWithValue('Email is not valid and password must be 8 characters long');
+//     // }
 
-    if(credentials.password !== credentials.confirmPassword){
-      return thunkAPI.rejectWithValue('Passwords do not match');
-    }
+//     if(credentials.password !== credentials.confirmPassword){
+//       return thunkAPI.rejectWithValue('Passwords do not match');
+//     }
 
-    try {
-      const res = await  UpdateUser(data);
-      return { user: res, email:data.email};
-    } catch (err: any) {
-      let val:string = "";
-      if(typeof err.response.data==='object'){
-       Object.values(err.response.data).forEach(value => {
-       console.log(value);
-       val+=value+', ';
+//     try {
+//       const res = await  UpdateUser(data);
+//       return { user: res, email:data.email};
+//     } catch (err: any) {
+//       let val:string = "";
+//       if(typeof err.response.data==='object'){
+//        Object.values(err.response.data).forEach(value => {
+//        console.log(value);
+//        val+=value+', ';
       
-    });}
-      const errorMessage = val.slice(0, -2);
-      return thunkAPI.rejectWithValue(errorMessage || 'Signup failed');
-    }
-  }
-);
+//     });}
+//       const errorMessage = val.slice(0, -2);
+//       return thunkAPI.rejectWithValue(errorMessage || 'Signup failed');
+//     }
+//   }
+// );
 
 export const signUser = createAsyncThunk(
   'auth/signUser',
-  async (credentials: { username: string | undefined , email: string | undefined; password: string | undefined, confirmPassword: string| undefined }, thunkAPI) => {
+  async (credentials: { username: string , email: string; password: string , confirm_password: string }, thunkAPI) => {
     try {
-      const res = await  SignUser(credentials.username,credentials.email,credentials.password);
-      return { user: res, email:credentials.email};
+      const res = await  SignUser(credentials.username,credentials.email,credentials.password,credentials.confirm_password);
+      return { user: res?.data, email:credentials.email};
     } catch (err: any) {
       let val:string = "";
       if(typeof err.response.data==='object'){
        Object.values(err.response.data).forEach(value => {
        console.log(value);
        val+=value+', ';
-      
-    });}
+      });}
       const errorMessage = val.slice(0, -2);
       return thunkAPI.rejectWithValue(errorMessage || 'Signup failed');
     }
   }
 );
+
 
 const authSlice = createSlice({
   name: 'auth',
@@ -130,7 +134,21 @@ const authSlice = createSlice({
       state.token = null;
     },
     log:(state) =>{
-      state.isAuthenticated=true;
+      state.isAuthenticated = true;
+      // state.isAuthChecked = true;
+    },
+    updateError:(state)=>{
+      state.error=null;
+    },
+    UpdateAuth:(state,action)=>{
+      const {username,email}=action.payload
+      state.username=username
+      state.email=email
+      state.isAuthenticated=true
+      state.isAuthChecked=true
+    },
+    UpdateAuthFlag:(state)=>{
+      state.isAuthChecked=true;
     }
   },
   extraReducers: (builder) => {
@@ -141,9 +159,12 @@ const authSlice = createSlice({
         state.token = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.email= action.payload.email;
+        state.username=action.payload.user.username
+        state.email= action.payload.user.email;
         state.isAuthenticated = true;
+        state.isAuthChecked=true;
         state.loading = false;
+        state.token=action.payload.user.token;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -167,5 +188,5 @@ const authSlice = createSlice({
       });
   },
 });
-export const { logout,log} = authSlice.actions;
+export const { logout,log,updateError,UpdateAuth,UpdateAuthFlag} = authSlice.actions;
 export default authSlice.reducer;

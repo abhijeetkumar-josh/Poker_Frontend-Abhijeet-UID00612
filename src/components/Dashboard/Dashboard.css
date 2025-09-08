@@ -1,0 +1,51 @@
+
+.game-users-container {
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.game-users-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.game-users-table th,
+.game-users-table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.game-users-table thead {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+.game-users-table tr:hover {
+  background-color: #fafafa;
+}
+
+.action-col {
+  text-align: center;
+  width: 80px;
+}
+
+.delete-cell {
+  text-align: center;
+}
+
+.primary--button--modifier {
+  color:white;
+  background-color: #ee3131;
+  padding:6px 20px;
+}
+
+.primary--button--modifier:hover {
+  color:white;
+  background-color: #ee3131;
+}
+
+.cursor{
+  cursor: pointer;
+}
